@@ -2,20 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { Octokit } from '@octokit/rest';
 
 interface Repository {
   id: number;
   name: string;
-  description: string;
+  description: string | null;
   html_url: string;
   private: boolean;
   stargazers_count: number;
-  language: string;
-  updated_at: string;
+  language: string | null;
+  updated_at: string | null;
 }
 
 export default function GitHubRepos() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [repos, setRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,13 +26,23 @@ export default function GitHubRepos() {
     async function fetchRepos() {
       if (session?.accessToken) {
         try {
-          const response = await fetch('https://api.github.com/user/repos?sort=updated&per_page=100', {
-            headers: {
-              Authorization: `Bearer ${session.accessToken}`,
-            },
+          const octokit = new Octokit({
+            auth: session.accessToken,
           });
-          const data = await response.json();
-          setRepos(data);
+
+          const { data } = await octokit.request('GET /user/repos', {
+            sort: 'updated',
+            per_page: 100,
+            headers: {
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          });
+
+          // Filter for private repositories with data- prefix
+          const filteredRepos = data.filter((repo: Repository) => 
+            repo.private && repo.name.startsWith('data-')
+          );
+          setRepos(filteredRepos);
         } catch (error) {
           console.error('Error fetching repos:', error);
         }
@@ -51,19 +64,17 @@ export default function GitHubRepos() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-7xl mx-auto p-6">
       {repos.map((repo) => {
-        const updatedDate = new Date(repo.updated_at).toLocaleDateString('en-US', {
+        const updatedDate = new Date(repo?.updated_at ?? '').toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'short',
           day: 'numeric'
         });
 
         return (
-          <a
+          <div
             key={repo.id}
-            href={repo.html_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 flex flex-col h-full"
+            onClick={() => router.push(`/repositories/${repo.name}`)}
+            className="group p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 flex flex-col h-full cursor-pointer"
           >
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -86,17 +97,15 @@ export default function GitHubRepos() {
             <p className="text-gray-600 text-sm flex-grow">
               {repo.description || 'No description provided'}
             </p>
-            
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 text-sm text-gray-500">
+
+            <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
+              <span>{updatedDate}</span>
               <div className="flex items-center">
-                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 .25a.75.75 0 0 1 .673.418l3.058 6.197 6.839.994a.75.75 0 0 1 .415 1.279l-4.948 4.823 1.168 6.811a.75.75 0 0 1-1.088.791L12 18.347l-6.117 3.216a.75.75 0 0 1-1.088-.79l1.168-6.812-4.948-4.823a.75.75 0 0 1 .416-1.28l6.838-.993L11.328.668A.75.75 0 0 1 12 .25z"/>
-                </svg>
+                <span className="mr-2">⭐</span>
                 {repo.stargazers_count}
               </div>
-              <span>{updatedDate}</span>
             </div>
-          </a>
+          </div>
         );
       })}
     </div>

@@ -50,7 +50,6 @@ const JsonEditor: React.FC<EditorProps> = ({
     <div className="relative w-full h-full">
       <Editor
         height="100%"
-        defaultValue={defaultValue}
         value={value}
         onChange={handleEditorChange}
         language="json"

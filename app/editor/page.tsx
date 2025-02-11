@@ -80,13 +80,9 @@ export default function EditorPage() {
   const formatJson = () => {
     try {
       const formattedJson = JSON.stringify(JSON.parse(content), null, 2);
-      setContent("{}");
-      setTimeout(() => {
-        setContent(formattedJson);
-      }, 200);
+      setContent(formattedJson);
     } catch (error: any) {
       console.error('Error formatting JSON:', error);
-      // Add a console log to see the error message
       console.log('Error message:', error.message);
     }
   };

@@ -26,6 +26,12 @@ export default function Navbar() {
                   Repositories
                 </Link>
                 <Link 
+                  href="/create-repo" 
+                  className="flex items-center px-2 py-2 ml-4 text-gray-900 hover:text-gray-600"
+                >
+                  Create Repository
+                </Link>
+                <Link 
                   href="/editor" 
                   className="flex items-center px-2 py-2 ml-4 text-gray-900 hover:text-gray-600"
                 >
