@@ -77,6 +77,20 @@ export default function EditorPage() {
     }
   };
 
+  const formatJson = () => {
+    try {
+      const formattedJson = JSON.stringify(JSON.parse(content), null, 2);
+      setContent("{}");
+      setTimeout(() => {
+        setContent(formattedJson);
+      }, 200);
+    } catch (error: any) {
+      console.error('Error formatting JSON:', error);
+      // Add a console log to see the error message
+      console.log('Error message:', error.message);
+    }
+  };
+
   return (
     <div className="flex h-screen">
       {/* File Explorer */}
@@ -86,9 +100,8 @@ export default function EditorPage() {
           {files.map((file) => (
             <div
               key={file.path}
-              className={`cursor-pointer p-2 rounded hover:bg-gray-200 ${
-                selectedFile === file.path ? 'bg-gray-200' : ''
-              }`}
+              className={`cursor-pointer p-2 rounded hover:bg-gray-200 ${selectedFile === file.path ? 'bg-gray-200' : ''
+                }`}
               onClick={() => setSelectedFile(file.path)}
             >
               {file.name}
@@ -102,9 +115,10 @@ export default function EditorPage() {
         {selectedFile ? (
           <>
             <div className="p-4 border-b">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-end gap-3">
                 <h2 className="text-lg font-semibold">{selectedFile}</h2>
                 <Button onClick={saveFile}>Save</Button>
+                <Button onClick={formatJson}>Pretty JSON</Button>
               </div>
             </div>
             {loading ? (
