@@ -18,12 +18,20 @@ export default function Navbar() {
               Home
             </Link>
             {session && (
-              <Link 
-                href="/repositories" 
-                className="flex items-center px-2 py-2 ml-4 text-gray-900 hover:text-gray-600"
-              >
-                Repositories
-              </Link>
+              <>
+                <Link 
+                  href="/repositories" 
+                  className="flex items-center px-2 py-2 ml-4 text-gray-900 hover:text-gray-600"
+                >
+                  Repositories
+                </Link>
+                <Link 
+                  href="/editor" 
+                  className="flex items-center px-2 py-2 ml-4 text-gray-900 hover:text-gray-600"
+                >
+                  Editor
+                </Link>
+              </>
             )}
           </div>
           <div className="flex items-center">
